@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="//www.parsecdn.com/js/parse-1.3.3.min.js"></script>
+    <script src="/vendor/jqconsole.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <style type="text/css">
+        body, html {
+            margin: 0px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="console"></div>
+    <script>
+      $(function () {
+        // var former = console.log;
+        console.log = function(msg){
+            jqconsole.Write(msg + '\n', 'jqconsole-output');
+            // former(msg);  //maintains existing logging via the console.
+        }
+
+        // window.onerror = function(message, url, linenumber) {
+        //     console.log("JavaScript error: " + message + " on line " + 
+        //             linenumber + " for " + url);
+        // }
+
+
+        //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+        function getParameterByName(name) {
+            name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+            var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+        var jqconsole = $('#console').jqconsole('Hello ' + getParameterByName('username') + '\n', '$ ');
+        Romulus = Parse
+        // romulus
+        Romulus.initialize(getParameterByName('app_id'), getParameterByName('js_key'));
+        var startPrompt = function () {
+          // Start the prompt with history enabled.
+          jqconsole.Prompt(true, function (input) {
+                if (input.length > 0) {
+                    var output, style
+                    try {
+                        output = eval.call(window, input)
+                        output = JSON.stringify(output)
+                        //http://stackoverflow.com/questions/4670805/javascript-eval-on-global-scope
+                        if (output === undefined) {
+                            style = "jqconsole-output-undef"
+                        } else {
+                            style = "jqconsole-output"                            
+                        }
+
+                    }
+                    catch(err) {
+                        output = err.message
+                        style = "jqconsole-output-error"
+                    }
+                    jqconsole.Write(output + '\n', style);                
+                    // Restart the prompt.
+                }
+                startPrompt(); 
+            });
+        };
+        startPrompt();
+      });
+    </script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="//www.parsecdn.com/js/parse-1.3.3.min.js"></script>
+    <script src="http://fb.me/react-0.12.2.min.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
+    <script src="/vendor/ace.js"></script>
+    <link rel="stylesheet" type="text/css" href="/vendor/normalize.css">
+    <link rel="stylesheet" type="text/css" href="/style.css">
+</head>
+<body>
+
+    <script type="text/jsx">
+        // var LikeButton = React.createClass({
+        //   getInitialState: function() {
+        //     return {liked: false};
+        //   },
+        //   handleClick: function(event) {
+        //     this.setState({liked: !this.state.liked});
+        //   },
+        //   render: function() {
+        //     var text = this.state.liked ? 'like' : 'haven\'t liked';
+        //     return (
+        //       <p onClick={this.handleClick}>
+        //         You {text} this. Click to toggle.
+        //       </p>
+        //     );
+        //   }
+        // });
+
+        // React.render(
+        //   <LikeButton />,
+        //   document.getElementById('example')
+        // );
+
+
+
+        var CommentForm = React.createClass({
+            handleSubmit: function(e) {
+                e.preventDefault();
+                var username = this.refs.username.getDOMNode().value.trim();
+                var password = this.refs.password.getDOMNode().value.trim();
+                if (!username || !password) {
+                    return;
+                }
+                Parse.User.logIn(username, password, {
+                    success: function(user) {
+                        // Do stuff after successful login.
+                        console.log(user)
+                        console.log("?app_id=" + user.attributes.app_id + "&js_key=" + user.attributes.js_key)
+                        React.render(
+                            <div>
+                                <Console app_id={user.attributes.app_id} js_key={user.attributes.js_key} username={username} />
+                                <Editor />
+                            </div>,
+                            document.getElementById('home')
+                        );
+                    },
+                    error: function(user, error) {
+                        // The login failed. Check error to see why.
+                        // this.refs.username.getDOMNode().value = '';
+                        // this.refs.password.getDOMNode().value = '';
+                    }
+                });
+                // this.props.onCommentSubmit({author: author, text: text});
+                return;
+            },
+            render: function() {
+                return (
+                    <form className="commentForm" onSubmit={this.handleSubmit}>
+                        <input type="text" placeholder="username" ref="username" />
+                        <br />
+                        <input type="password" placeholder="password" ref="password" />
+                        <br />
+                        <input type="submit" value="Login" />
+                    </form>
+                );
+            }
+        });
+
+        var Console = React.createClass({
+          render: function() {
+            return (
+              <iframe className="console" src={"/console.html?app_id=" + this.props.app_id + "&js_key=" + this.props.js_key + "&username=" + this.props.username} />
+            );
+          }
+        });
+
+        var Editor = React.createClass({
+            componentDidMount: function() {
+                var editor = ace.edit("editor");
+                    // editor.setTheme("ace/theme/monokai");
+                    // editor.getSession().setMode("ace/mode/javascript");
+            },
+            render: function() {
+                return (
+                    <div className="editor">
+                        <select>
+                            <option value="">Files</option>
+                            <option value="mercedes"> - Mercedes</option>
+                            <option value="audi"> - Audi</option>
+                            <option value="L">Lambda Functions</option>
+                            <option value="mercedes"> - Mercedes</option>
+                            <option value="audi"> - Audi</option>
+                        </select>
+                        <button>Save</button>
+                        <button>Delete</button>
+                        <button>New</button>
+                        <div id="editor"></div>
+                    </div>
+                )
+            }
+        })
+
+        React.render(
+          <CommentForm username="maxmcd" />,
+          document.getElementById('home')
+        );
+    </script>    <!-- <iframe src="/console.html" class="console"></iframe> -->
+    <div id="home"></div>
+    <script>
+      $(function () {
+
+
+
+        app = {
+            new_lambda: function() {
+
+            }
+        }
+        Romulus = Parse
+
+        // romulus
+        Romulus.initialize("TfJHzuJVZYU97rJc02JrJ8jy8JtsDNe1tbqACmJh", "PXp8V500uu6cMrUeAbuMBXuT1Kev872A7XvET1uG");
+
+
+        Romulus.extend
+
+        // Parse.User.logIn("romulus", "password", {
+        //   success: function(user) {
+        //     // Do stuff after successful login.
+        //   },
+        //   error: function(user, error) {
+        //     // The login failed. Check error to see why.
+        //   }
+        // });
+        // current_user = Parse.User.current()
+        // var Lambda = Parse.Object.extend("Lambda");
+        // var privateNote = new Lambda();
+        // privateNote.set("content", "wheeee");
+        // privateNote.set("user", current_user)
+        // privateNote.setACL(new Parse.ACL(Parse.User.current()));
+        // // privateNote.save();
+        // var query = new Parse.Query(Lambda);
+        //     query.equalTo("user", current_user);
+        //     query.find({
+        //       success: function(userLambdas) {
+        //         console.log(userLambdas)
+        //       }
+        //     });
+
+        // // together
+        // Parse.initialize("KwUvONDmjowjJdgw8qJzdvOUeYt1gmd07urHwWXf", "5WCPTPxFmUnRx95fRMIDIlosBuHrPjELSAOyE7Lr");
+
+      });
+    </script>
+</body>
+</html>
