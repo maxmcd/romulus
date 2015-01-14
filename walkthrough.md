@@ -13,9 +13,9 @@ user.signUp()
 <script type="text/jsx">
     $(function() {
         if (Parse.User.current()) {
-            $('body').prepend("A user is logged in. The users email is " + Parse.User.current().attributes.email)            
+            $('.container').prepend("A user is logged in. The users email is " + Parse.User.current().attributes.email)            
         } else {
-            $('body').prepend("No one is logged in")
+            $('.container').prepend("No one is logged in")
         }
     })
     var LoginForm = React.createClass({

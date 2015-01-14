@@ -1,30 +1,16 @@
 # Romulus
 
-Romulus allows you to build applications without a backend. You just get a datastore and lambda functionality. 
+Romulus is a "framework" that builds apps comprised of a database and client code. There is no "backend code". All functionalty is handled through client javascript, a javscript database library, and Amazon Lambda functions.
 
-User interface provides a repl and javascript writing. 
+To demonstrate it's utility as an application framework, Romulus is hosted on itself. 
 
-You can write lambda functions, and they get set up on aws.
+Core functionality currently provided by:
 
-Datastore is managed by Parse. 
+ - **Static Hosting**: S3
+ - **Database**: Parse (yes, not a datebase, yet)
+ - **Backend "action"**: Amazon Lambda
 
-You can assign user structure and object store with parse's stuff. 
+####Todo:
+ 1. Get amazon lambda function creation working from the frontend
+ 2. Replace Parse with a real database
 
-
-## Middleware
-
- - New user signups and access to lambda/parse
- - Storing user data 
- - Serving sites, sending data to cloudfront
- - Store subdomains
- - Store lambda functions and associate them with users
- 
-## Setup
-
-The following vendor files are required:
-```
-ace.js
-jqconsole.min.js
-mousetrap.min.js
-normalize.css
-```
