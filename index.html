@@ -2,12 +2,13 @@
 <html>
 <head>
     <title></title>
-    <script src="http://fb.me/react-0.12.2.min.js"></script>
-    <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
+    <script src="//fb.me/react-0.12.2.min.js"></script>
+    <script src="//fb.me/JSXTransformer-0.12.2.js"></script>
     <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
     <script src="//www.parsecdn.com/js/parse-1.3.3.min.js"></script>
-    <script src="/vendor/ace.js"></script>
-    <link rel="stylesheet" type="text/css" href="/vendor/normalize.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/ace.js"></script>
+    <script src="//sdk.amazonaws.com/js/aws-sdk-2.1.5.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.2/normalize.min.css">
     <link rel="stylesheet" type="text/css" href="/style.css">
 </head>
 <body>
@@ -19,6 +20,15 @@
         // privateNote.set("user", Parse.User.current())
         // privateNote.setACL(new Parse.ACL(Parse.User.current()));        
         // privateNote.save();
+
+        // These credentials have very specific whitelisted permissions.
+        AWS.config.update({accessKeyId: 'AKIAJOPV56RRYMVX7HKQ', secretAccessKey: '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'});
+
+        var s3 = new AWS.S3();
+        // var params = {Bucket: 'romulus-host', Key: 'test/text.txt', Body: "hi there"};
+        // s3.upload(params, function(err, data) {
+        //   console.log(err, data);
+        // });
 
         // // together
         // Parse.initialize("KwUvONDmjowjJdgw8qJzdvOUeYt1gmd07urHwWXf", "5WCPTPxFmUnRx95fRMIDIlosBuHrPjELSAOyE7Lr");
@@ -70,6 +80,38 @@
         //   <LikeButton />,
         //   document.getElementById('example')
         // );
+
+
+        var FileForm = React.createClass({
+            handleSubmit: function() {
+                var filename = this.refs.filename.getDOMNode().value.trim();
+                if (/^.*?\.(js|css|html)/.test(filename)) {
+                    var File = Parse.Object.extend("File");
+                    var newFile = new File();
+                    newFile.set("user", Parse.User.current())
+                    newFile.set("name", filename)
+                    newFile.setACL(new Parse.ACL(Parse.User.current()));        
+                    newFile.save();
+                    $editor.file = newFile
+                    $editor.files.push(newFile)
+                    document.getElementById('form').innerHTML = ''
+                } else {
+                    console.log('bad filename')
+                }
+                return false
+            },
+            render: function() {
+                return (
+                    <div className="file-form">
+                        <div>Filename</div>
+                        <form onSubmit={this.handleSubmit}>
+                            <input type="text" ref="filename"/>
+                            <input type="submit" value="Create" />
+                        </form>
+                    </div>
+                )
+            }
+        })
 
 
 
@@ -148,17 +190,48 @@
                 // editor.getSession().setMode("ace/mode/javascript");
             },
             new_file: function() {
-                var File = Parse.Object.extend("File");
-                var newFile = new File();
-                newFile.set("user", Parse.User.current())
-                newFile.setACL(new Parse.ACL(Parse.User.current()));        
-                newFile.save();
-                $editor.file = newFile
-                $editor.files.push(newFile)
+                React.renderComponent(<FileForm />, document.getElementById('form'));
+                // var File = Parse.Object.extend("File");
+                // var newFile = new File();
+                // newFile.set("user", Parse.User.current())
+                // newFile.setACL(new Parse.ACL(Parse.User.current()));        
+                // newFile.save();
+                // $editor.file = newFile
+                // $editor.files.push(newFile)
             },
             save: function() {
                 if (!!$editor.file) {
                     $editor.file.set('body', $editor.getValue())
+
+                    var filetypes = {
+                        'css':'text/css',
+                        'html':'text/html',
+                        'js':'application/javascript'
+                    }
+
+                    var filename = $editor.file.attributes.name
+                    var match = filename.match(/.*?\.(js|css|html)/)
+                    if (match) {
+                        extension = match[1]
+                    } else {
+                        // there was an error saving
+                        return;
+                    }
+
+                    var file = new Blob([$editor.file.attributes.body], {type : filetypes[extension]})
+                    var key = Parse.User.current().attributes.username + '/' + $editor.file.attributes.name
+                    var params = {
+                        Bucket: 'romulus-host', 
+                        Key: key, 
+                        Body: file,
+                        ContentType: file.type
+                        // ResponseContentDisposition: 'inline' //server the file don't download it, this defaults to attachement
+                        // ResponseContentType: 'js'
+                    };
+                    console.log(file)
+                    s3.upload(params, function(err, data) {
+                      console.log(err, data);
+                    });
                     $editor.file.save()
                 }
             },
@@ -220,7 +293,6 @@
                         $editor.setValue($editor.files[i].attributes.body)
                     }
                 }
-
             },
             render: function() {
                 var options = this.props.data.map(function(file, index) {
@@ -247,10 +319,12 @@
             var app_id = current_user.attributes.app_id
             var js_key = current_user.attributes.js_key
             var username = current_user.attributes.username
+            var url = "http://" + Parse.User.current().attributes.username + ".xmcd.co/"
             React.render(
                 <div>
                     <Console app_id={app_id} js_key={js_key} username={username} />
                     <Editor />
+                    <a href={url} target="_blank">{url}</a>
                 </div>,
                 document.getElementById('home')
             );
@@ -261,6 +335,7 @@
             );                        
         }
     </script>    <!-- <iframe src="/console.html" class="console"></iframe> -->
+    <div id="form"></div>
     <div id="home"></div>
     <script>
       $(function () {
