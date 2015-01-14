@@ -18,19 +18,6 @@
 
     <div id="console"></div>
     <script>
-      $(function () {
-        // var former = console.log;
-        console.log = function(msg){
-            jqconsole.Write(msg + '\n', 'jqconsole-output');
-            // former(msg);  //maintains existing logging via the console.
-        }
-
-        // window.onerror = function(message, url, linenumber) {
-        //     console.log("JavaScript error: " + message + " on line " + 
-        //             linenumber + " for " + url);
-        // }
-
-
         //http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
         function getParameterByName(name) {
             name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
@@ -38,39 +25,59 @@
                 results = regex.exec(location.search);
             return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
         }
-
-        var jqconsole = $('#console').jqconsole('Hello ' + getParameterByName('username') + '\n', '$ ');
         Romulus = Parse
-        // romulus
-        Romulus.initialize(getParameterByName('app_id'), getParameterByName('js_key'));
-        var startPrompt = function () {
-          // Start the prompt with history enabled.
-          jqconsole.Prompt(true, function (input) {
-                if (input.length > 0) {
-                    var output, style
-                    try {
-                        output = eval.call(window, input)
-                        output = JSON.stringify(output)
-                        //http://stackoverflow.com/questions/4670805/javascript-eval-on-global-scope
-                        if (output === undefined) {
-                            style = "jqconsole-output-undef"
-                        } else {
-                            style = "jqconsole-output"                            
-                        }
+        Romulus.open = function() {
+            window.open('http://' + getParameterByName('username') + '.xmcd.co');
+        }
+        help = function() {
+            console.log("Welcome to Romulus")
+            console.log("This is just a javascript console")
+            console.log("")
+            console.log("Open your site with Romulus.open()")
+        }
 
+
+        $(function () {
+
+
+
+            console.log = function(msg){
+                jqconsole.Write(msg + '\n', 'jqconsole-output');
+                // former(msg);  //maintains existing logging via the console.
+            }
+
+            var jqconsole = $('#console').jqconsole('Hello ' + getParameterByName('username') + '\n', '$ ');
+            
+            // romulus
+            Romulus.initialize(getParameterByName('app_id'), getParameterByName('js_key'));
+            var startPrompt = function () {
+              // Start the prompt with history enabled.
+              jqconsole.Prompt(true, function (input) {
+                    if (input.length > 0) {
+                        var output, style
+                        try {
+                            output = eval.call(window, input)
+                            output = JSON.stringify(output)
+                            //http://stackoverflow.com/questions/4670805/javascript-eval-on-global-scope
+                            if (output === undefined) {
+                                style = "jqconsole-output-undef"
+                            } else {
+                                style = "jqconsole-output"                            
+                            }
+
+                        }
+                        catch(err) {
+                            output = "Error: " + err.message
+                            style = "jqconsole-output-error"
+                        }
+                        jqconsole.Write(output + '\n', style);                
+                        // Restart the prompt.
                     }
-                    catch(err) {
-                        output = "Error: " + err.message
-                        style = "jqconsole-output-error"
-                    }
-                    jqconsole.Write(output + '\n', style);                
-                    // Restart the prompt.
-                }
-                startPrompt(); 
-            });
-        };
-        startPrompt();
-      });
+                    startPrompt(); 
+                });
+            };
+            startPrompt();
+        });
     </script>
 </body>
 </html>

@@ -13,6 +13,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/theme-tomorrow_night_eighties.js"></script>
     <script src="//sdk.amazonaws.com/js/aws-sdk-2.1.5.min.js"></script>
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.2/normalize.min.css">
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
     <link rel="stylesheet" type="text/css" href="/style.css">
 </head>
 <body>
@@ -51,6 +52,7 @@
         var FileForm = React.createClass({
             handleSubmit: function(e) {
                 e.preventDefault();
+                $editor.file.set("body", $editor.getValue())
                 var filename = this.refs.filename.getDOMNode().value.trim();
                 if (/^.*?\.(js|css|html)/.test(filename)) {
                     var File = Parse.Object.extend("File");
@@ -83,7 +85,7 @@
 
 
 
-        var CommentForm = React.createClass({
+        var LoginForm = React.createClass({
             handleSubmit: function(e) {
                 e.preventDefault();
                 var username = this.refs.username.getDOMNode().value.trim();
@@ -96,8 +98,9 @@
                         // Do stuff after successful login.
                         console.log(user)
                         console.log("?app_id=" + user.attributes.app_id + "&js_key=" + user.attributes.js_key)
+                        document.getElementById('login').innerHTML = ''
                         React.render(
-                            <div>
+                            <div className="height100">
                                 <Console app_id={user.attributes.app_id} js_key={user.attributes.js_key} username={username} />
                                 <Editor />
                             </div>,
@@ -115,13 +118,17 @@
             },
             render: function() {
                 return (
-                    <form className="commentForm" onSubmit={this.handleSubmit}>
-                        <input type="text" placeholder="username" ref="username" />
+                    <div>
                         <br />
-                        <input type="password" placeholder="password" ref="password" />
-                        <br />
-                        <input type="submit" value="Login" />
-                    </form>
+                        <h3>Romulus</h3>
+                        <form className="LoginForm" onSubmit={this.handleSubmit}>
+                            <input type="text" placeholder="username" ref="username" />
+                            <br />
+                            <input type="password" placeholder="password" ref="password" />
+                            <br />
+                            <input type="submit" value="Login" />
+                        </form>
+                    </div>
                 );
             }
         });
@@ -166,7 +173,7 @@
                     }
                 });
                 $editor.setTheme("ace/theme/tomorrow_night_eighties");
-                $editor.getSession().setOption("wrap", true)
+                // $editor.getSession().setOption("wrap", true)
             },
             new_file: function() {
                 React.renderComponent(<FileForm editor={this}/>, document.getElementById('form'));
@@ -238,9 +245,10 @@
             },
             logout: function() {
                 Parse.User.logOut()
+                document.getElementById('home').innerHTML = ""
                 React.render(
-                    <CommentForm username="maxmcd" />,
-                    document.getElementById('home')
+                    <LoginForm username="maxmcd" />,
+                    document.getElementById('login')
                 ); 
             },
             getInitialState: function() {
@@ -306,22 +314,23 @@
             var app_id = current_user.attributes.app_id
             var js_key = current_user.attributes.js_key
             var username = current_user.attributes.username
-            var url = "http://" + Parse.User.current().attributes.username + ".xmcd.co/"
             React.render(
                 <div className="height100">
                     <Console app_id={app_id} js_key={js_key} username={username} />
                     <Editor />
-                    <a href={url} target="_blank">{url}</a>
                 </div>,
                 document.getElementById('home')
             );
         } else {
             React.render(
-                <CommentForm username="maxmcd" />,
-                document.getElementById('home')
+                <LoginForm username="maxmcd" />,
+                document.getElementById('login')
             );                        
         }
     </script>    <!-- <iframe src="/console.html" class="console"></iframe> -->
+    <div class="container">
+        <div id="login"></div>
+    </div>
     <div id="form"></div>
     <div id="home"></div>
 </body>
