@@ -11,18 +11,12 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/mode-css.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/mode-html.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.1.3/theme-tomorrow_night_eighties.js"></script>
-    <script src="//sdk.amazonaws.com/js/aws-sdk-2.1.5.min.js"></script>
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/normalize/3.0.2/normalize.min.css">
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
     <link rel="stylesheet" type="text/css" href="/style.css">
 </head>
 <body>
     <script type="text/javascript">
-
-        // These credentials have very specific whitelisted permissions.
-        AWS.config.update({accessKeyId: 'AKIAJOPV56RRYMVX7HKQ', secretAccessKey: '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'});
-
-        var s3 = new AWS.S3();
 
         $(function() {
             Romulus = Parse
@@ -188,12 +182,12 @@
             save: function() {
                 if (!!$editor.file) {
                     $editor.file.set('body', $editor.getValue())
-
                     var filetypes = {
                         'css':'text/css',
                         'html':'text/html',
                         'js':'application/javascript'
                     }
+
 
                     var filename = $editor.file.attributes.name
                     var match = filename.match(/.*?\.(js|css|html)/)
@@ -205,17 +199,21 @@
                     }
 
                     var file = new Blob([$editor.file.attributes.body], {type : filetypes[extension]})
-                    var key = Parse.User.current().attributes.username + '/' + $editor.file.attributes.name
-                    var params = {
-                        Bucket: 'romulus-host', 
-                        Key: key, 
-                        Body: file,
-                        ContentType: file.type
-                        // ResponseContentDisposition: 'inline' //server the file don't download it, this defaults to attachement
-                        // ResponseContentType: 'js'
-                    };
-                    s3.upload(params, function(err, data) {
-                      // console.log(err, data);
+                    var key = $editor.file.attributes.name
+                    var fd = new FormData();
+                        fd.append('bucket', 'romulus-host');
+                        fd.append('body', file);
+                        fd.append('key', key);
+                        fd.append('contentType', file.type);
+                        fd.append('sessionToken', Parse.User.current()._sessionToken)
+
+                    $.ajax({
+                        type: "POST",
+                        url: "http://104.236.254.109:8080/",
+                        data: fd,
+                        processData: false,
+                        contentType: false, 
+                        dataType: 'json'
                     });
                     $editor.file.save()
                 }
